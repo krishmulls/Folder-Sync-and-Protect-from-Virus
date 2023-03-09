@@ -35,19 +35,43 @@ class folderSync():
                 files[filekey] = self.sha2hasher.cathash_dir(os.path.join(dirpath, dir), pattern = '*')
         return files
     
+    def checkCopy(self, file):
+        self.copiedfile = False
+        hashValue = self.sourceFiles[file]
+        if hashValue in self.replicaFiles.values() and hashValue != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855":
+            self.copiedfile = True
+        return self.copiedfile
+
+    def loggingCreateCopyRemove(self, action, path, state):
+        if action == "Remove":
+            self.logger.info("Removed a folder %s", path)
+        if action == "CopyorCreate":
+            if state == True:
+                self.logger.info("Copied a file %s", path)
+            else:
+                self.logger.info("Created a file %s", path)
+
+    
     def copyFileSourceToDestination(self, changeList):
         for files in changeList:
+            check = self.checkCopy(files)
             if os.path.isfile(self.sourceFolder + files):
                 fileDirectory = files.rsplit('\\',1)[0]
                 try:
                     shutil.copy2((self.sourceFolder + files), (self.replicaFolder + files))
+                    self.loggingCreateCopyRemove("CopyorCreate", self.replicaFolder + files, check)
+                    
                 except:
-                    os.mkdir(self.replicaFolder+fileDirectory)
+                    fileExist = os.path.exists(self.replicaFolder+fileDirectory)
+                    if not fileExist:
+                        os.mkdir(self.replicaFolder+fileDirectory)
                     shutil.copy2((self.sourceFolder + files), (self.replicaFolder + files))
+                    self.loggingCreateCopyRemove("CopyorCreate", self.replicaFolder + files, check)
             else:
-                check = os.path.exists(self.replicaFolder+files)
-                if not check:
+                fileExist = os.path.exists(self.replicaFolder+files)
+                if not fileExist:
                     os.mkdir(self.replicaFolder+files)
+                    self.loggingCreateCopyRemove("CopyorCreate", self.replicaFolder + files, check)
 
     def deleteFolderFiles(self):
         for sKey in self.replicaFiles: 
@@ -60,7 +84,7 @@ class folderSync():
                         self.logger.info("Removed a file %s", path)
                     else:
                         shutil.rmtree(path)
-                        self.logger.info("Removed a folder %s", path)
+                        self.loggingCreateCopyRemove("Remove", path, False)
                 except:
                     self.logger.error("You dont have permission to delete and therefore the folders are not sync")
     
@@ -87,14 +111,12 @@ class folderSync():
             else:
                 self.logger.info('Folder Not Synced')
                 if modifiedList !=[]:
-                    self.copyFileSourceToDestination( modifiedList)
+                    self.copyFileSourceToDestination(modifiedList)
                 if notFoundList != []:
                     self.copyFileSourceToDestination( notFoundList)
                 if self.sourceFiles != self.replicaFiles: 
                     self.deleteFolderFiles()
 
-
-        
 
 if __name__ == '__main__':
     sync_obj = folderSync()
