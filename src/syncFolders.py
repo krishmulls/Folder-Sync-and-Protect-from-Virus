@@ -59,12 +59,12 @@ class FolderSync:
         self.logger.debug("checkCopy has been invoked")
         isCopiedFile = False
         hashValue = sourceFiles[file]
-        fileName = file.rsplit("\\", 1)[1]
+        fileName = file.rsplit("\\", 1)[1].lower()
         for key in replicaFiles:
             if (
-                fileName in key
-                or (fileName.split(" copy")[0]) in key
-                or (fileName.split(" - copy")[0]) in key
+                fileName in key.lower()
+                or (fileName.split(" copy")[0]) in key.lower()
+                or (fileName.split(" - copy")[0]) in key.lower()
             ):
                 isCopiedFile = True
         if hashValue in replicaFiles.values() and isCopiedFile == True:
