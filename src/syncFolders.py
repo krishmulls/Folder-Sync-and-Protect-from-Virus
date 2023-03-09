@@ -19,7 +19,7 @@ def logInitializer(logPath = None):
             logger.addHandler(log_handler)
         return logger
 
-class folderSync():
+class FolderSync():
 
     def __init__(self):
         self.sha2hasher = FileHash('sha256')
@@ -35,14 +35,14 @@ class folderSync():
                 files[filekey] = self.sha2hasher.cathash_dir(os.path.join(dirpath, dir), pattern = '*')
         return files
     
-    def checkCopy(self, file):
+    def checkCopy(self, file, sourceFiles, replicaFiles):
         self.copiedfile = False
-        hashValue = self.sourceFiles[file]
-        if hashValue in self.replicaFiles.values() and hashValue != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855":
+        hashValue = sourceFiles[file]
+        if hashValue in replicaFiles.values() and hashValue != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855":
             self.copiedfile = True
         return self.copiedfile
 
-    def loggingCreateCopyRemove(self, action, path, state):
+    def loggingCreateCopyRemove(self, action, path, state) -> None:
         if action == "Remove":
             self.logger.info("Removed a folder %s", path)
         if action == "CopyorCreate":
@@ -52,9 +52,9 @@ class folderSync():
                 self.logger.info("Created a file %s", path)
 
     
-    def copyFileSourceToDestination(self, changeList):
+    def copyFileSourceToDestination(self, changeList, sourceFiles, replicaFiles) -> None:
         for files in changeList:
-            check = self.checkCopy(files)
+            check = self.checkCopy(files, sourceFiles, replicaFiles)
             if os.path.isfile(self.sourceFolder + files):
                 fileDirectory = files.rsplit('\\',1)[0]
                 try:
@@ -73,9 +73,9 @@ class folderSync():
                     os.mkdir(self.replicaFolder+files)
                     self.loggingCreateCopyRemove("CopyorCreate", self.replicaFolder + files, check)
 
-    def deleteFolderFiles(self):
-        for sKey in self.replicaFiles: 
-            if sKey not in self.sourceFiles and os.path.exists(self.replicaFolder + sKey): 
+    def deleteFolderFiles(self, sourceFiles, replicaFiles) -> None:
+        for sKey in replicaFiles: 
+            if sKey not in sourceFiles and os.path.exists(self.replicaFolder + sKey): 
                 try:
                     path = self.replicaFolder + sKey
                     # os.chmod(path, 0o777)  # uncomment it if you want to run with admin rights
@@ -88,7 +88,7 @@ class folderSync():
                 except:
                     self.logger.error("You dont have permission to delete and therefore the folders are not sync")
     
-    async def folderComparison(self, sourceFolder, replicaFolder, interval,  logPath):
+    def folderComparison(self, sourceFolder, replicaFolder, interval,  logPath) -> None:
         self.logger = logInitializer(logPath)
         self.sourceFolder = sourceFolder
         self.replicaFolder = replicaFolder
@@ -96,30 +96,29 @@ class folderSync():
             modifiedList = []
             notFoundList = []
             time.sleep(interval)
-            self.sourceFiles = self.fileHashDictGeneration(self.sourceFolder)
-            self.replicaFiles = self.fileHashDictGeneration(self.replicaFolder)
+            sourceFiles = self.fileHashDictGeneration(self.sourceFolder)
+            replicaFiles = self.fileHashDictGeneration(self.replicaFolder)
             
-            for sKey in self.sourceFiles:
-                if sKey in self.replicaFiles:
-                    if self.sourceFiles[sKey] != self.replicaFiles[sKey]:
+            for sKey in sourceFiles:
+                if sKey in replicaFiles:
+                    if sourceFiles[sKey] != replicaFiles[sKey]:
                         modifiedList.append(sKey)
                 else:
                     notFoundList.append(sKey)
 
-            if modifiedList == [] and notFoundList == [] and self.sourceFiles == self.replicaFiles: 
+            if modifiedList == [] and notFoundList == [] and sourceFiles == replicaFiles: 
                 self.logger.info('Folder Synced')
             else:
                 self.logger.info('Folder Not Synced')
                 if modifiedList !=[]:
-                    self.copyFileSourceToDestination(modifiedList)
+                    self.copyFileSourceToDestination(modifiedList, sourceFiles, replicaFiles)
                 if notFoundList != []:
-                    self.copyFileSourceToDestination( notFoundList)
-                if self.sourceFiles != self.replicaFiles: 
-                    self.deleteFolderFiles()
-
+                    self.copyFileSourceToDestination( notFoundList, sourceFiles, replicaFiles)
+                if sourceFiles != replicaFiles: 
+                    self.deleteFolderFiles(sourceFiles, replicaFiles)
 
 if __name__ == '__main__':
-    sync_obj = folderSync()
+    sync_obj = FolderSync()
     sourceFolder = r"D:\workspace\Veeam\example\sourceFolder"
     replicaFolder = r"D:\workspace\Veeam\example\replicaFolder"
     syncTime = 5
