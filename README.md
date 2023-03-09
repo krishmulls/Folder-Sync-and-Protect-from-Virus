@@ -33,6 +33,10 @@ The program syncFolders.py is written in order to synchronize two folders: sourc
 
 ### To Run the File:
 
-(Python Executable File) (File Path - syncFolders.py) (SourceFolder) (ReplicaFolder/BackupFolder) (SYnc Interval) (Logfile Path)
+(Python Executable File) (File Path - syncFolders.py) (SourceFolder) (ReplicaFolder/BackupFolder) (Sync Time Interval) (Logfile Path)
 
-**For Example**: python.exe d:\Workspace\Veeam\src\syncFolders.py d:\workspace\Veeam\example\sourceFolder D:\workspace\Veeam\example\replicaFolder 5 D:\workspace\Veeam
+**For Example**: python.exe  d:\Workspace\Veeam\src\syncFolders.py  d:\workspace\Veeam\example\sourceFolder  d:\workspace\Veeam\example\replicaFolder  5 d:\workspace\Veeam
+
+### Executed Proof:
+
+![Test](https://github.com/krishmulls/Veeam/blob/68e14c1dfc9315f9771b5d7157bbc84e1dbd24d6/example/sourceFolder/testProofImageSync.png)
