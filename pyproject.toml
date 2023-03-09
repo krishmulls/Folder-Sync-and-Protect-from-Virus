@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "veeam"
+version = "0.1.0"
+description = "Solving Task for role - Internal development in QA"
+authors = ["Murali Krishnan, Raajanthira <krishmulls456@gmail.com>"]
+readme = "README.md"
+packages = [{include = "veeam"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+filehash = "^0.2.dev1"
+black = "^23.1.0"
+isort = "^5.12.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
