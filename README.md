@@ -1,4 +1,4 @@
-Welcome Veeam Recruiting Team:
+Welcome Recruiting Team:
 ==============================
 
 The program syncFolders.py is written in order to synchronize two folders: source and replica. The program should maintain a full, identical copy of the source folder in the replica folder.
