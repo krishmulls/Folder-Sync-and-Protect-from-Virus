@@ -9,7 +9,7 @@ packages = [{include = "veeam"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 filehash = "^0.2.dev1"
-black = "^23.1.0"
+black = "^24.3.0"
 isort = "^5.12.0"
 
 
